@@ -1,7 +1,237 @@
-<h1>Mis prácticas</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis prácticas</title>
+    <!-- Importamos una fuente monoespaciada al estilo terminal -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #1a1b26;
+            --terminal-bg: #24283b;
+            --text: #a9b1d6;
+            --text-highlight: #c0caf5;
+            --accent-green: #9ece6a;
+            --accent-blue: #7aa2f7;
+            --accent-purple: #bb9af7;
+            --border: #414868;
+            --selected-bg: #3b4261;
+        }
 
-<ul>
-  <li><a href="./puntoventa/">POS</a></li>
-  <li><a href="./tarjeta/">Tarjeta</a></li>
-  <li><a href="./apigrafica/">Consumir API y Gráficas</a></li>
-</ul>
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .terminal {
+            background-color: var(--terminal-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-prompt {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .header-path {
+            color: var(--accent-blue);
+        }
+
+        .header-cmd {
+            color: var(--accent-purple);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.1s ease;
+            position: relative;
+            color: var(--text);
+        }
+
+        /* Ocultamos el link visualmente pero mantenemos la semántica */
+        li a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        /* Estado inactivo: sin flecha */
+        li::before {
+            content: "  ";
+            white-space: pre;
+            margin-right: 12px;
+            color: transparent;
+        }
+
+        /* Estado activo/seleccionado: con flecha y fondo */
+        li.selected {
+            background-color: var(--selected-bg);
+            color: var(--text-highlight);
+            font-weight: bold;
+        }
+
+        li.selected::before {
+            content: "❯ ";
+            color: var(--accent-green);
+        }
+
+        .footer {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--border);
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        .mode-indicator {
+            background-color: var(--accent-blue);
+            color: var(--bg);
+            padding: 2px 10px;
+            font-weight: bold;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+
+        .help-text {
+            color: #565f89;
+        }
+
+        kbd {
+            background-color: #1f2335;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal">
+        <div class="header">
+            <span class="header-prompt">dev@local</span>
+            <span class="header-path">~/practicas</span>
+            <span class="header-cmd">$ ls -l</span>
+        </div>
+
+        <ul id="menu">
+            <!-- Usamos data-url para manejar la navegación con JS -->
+            <li data-url="./puntoventa/">
+                <a href="./puntoventa/">./POS/</a>
+            </li>
+            <li data-url="./tarjeta/">
+                <a href="./tarjeta/">./Tarjeta/</a>
+            </li>
+            <li data-url="./apigrafica/">
+                <a href="./apigrafica/">./Consumir_API_y_Graficas/</a>
+            </li>
+        </ul>
+
+        <div class="footer">
+            <span class="mode-indicator">Normal</span>
+            <span class="help-text">
+                <kbd>↑</kbd> <kbd>↓</kbd> ó <kbd>j</kbd> <kbd>k</kbd> para moverte • <kbd>Enter</kbd> para abrir
+            </span>
+        </div>
+    </div>
+
+    <script>
+        const items = document.querySelectorAll('li');
+        let currentIndex = 0;
+
+        // Función para actualizar la clase visual
+        function updateSelection() {
+            items.forEach((item, index) => {
+                if (index === currentIndex) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        // Función para ir a la URL del elemento seleccionado
+        function navigateToSelected() {
+            const url = items[currentIndex].getAttribute('data-url');
+            if (url) {
+                window.location.href = url;
+            }
+        }
+
+        // Eventos de teclado
+        document.addEventListener('keydown', (e) => {
+            // Prevenir el scroll por defecto si usamos flechas
+            if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
+                e.preventDefault();
+            }
+
+            if (e.key === 'ArrowDown' || e.key === 'j') {
+                currentIndex = (currentIndex + 1) % items.length;
+                updateSelection();
+            } else if (e.key === 'ArrowUp' || e.key === 'k') {
+                currentIndex = (currentIndex - 1 + items.length) % items.length;
+                updateSelection();
+            } else if (e.key === 'Enter') {
+                navigateToSelected();
+            }
+        });
+
+        // Eventos de ratón
+        items.forEach((item, index) => {
+            item.addEventListener('mouseover', () => {
+                currentIndex = index;
+                updateSelection();
+            });
+
+            item.addEventListener('click', () => {
+                currentIndex = index;
+                updateSelection();
+                navigateToSelected();
+            });
+        });
+
+        // Iniciar la selección en el primer elemento
+        updateSelection();
+    </script>
+</body>
+</html>
